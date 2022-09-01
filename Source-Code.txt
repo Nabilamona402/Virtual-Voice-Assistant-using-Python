@@ -1,0 +1,143 @@
+import speech_recognition as sr
+import pyttsx3
+import datetime
+import pywhatkit
+import wikipedia
+import pyjokes
+import requests
+import bs4
+#from bs4 import BeautifulSoup
+
+
+listener = sr.Recognizer()
+hp = pyttsx3.init()
+voices = hp.getProperty('voices')
+hp.setProperty('voice', voices[1].id)
+
+
+def talk(text):
+    hp.say(text)
+    hp.runAndWait()
+
+
+def take_command():
+    try:
+        with sr.Microphone() as source:
+            print('listening...')
+            voice = listener.listen(source)
+            command = listener.recognize_google(voice)
+            command = command.lower()
+            if 'hp' in command:
+                command = command.replace('hp', '')
+    except:
+        pass
+    return command
+
+
+def run_hp():
+    command = take_command()
+
+    if 'hello' in command:
+        hour  = int(datetime.datetime.now().hour)
+        if hour>=0 and hour<=12:
+            print('Hi! Good Morning! How can I help?')
+            talk('Hi! Good Morning! How can I help?')
+        elif hour >12 and hour<=18:
+            print('Hi! Good Afternoon! How can I help?')
+            talk('Hi! Good Afternoon! How can I help?')
+        else:
+            print('Hi! Good Evening! How can I help?')
+            talk('Hi! Good Evening! How can I help?')
+
+    elif 'how are you' in command:
+        print('I am Fine. Thank you! I hope you are also fine.')
+        talk('I am Fine. Thank you! I hope you are also fine.')
+
+    elif 'who are you' in command:
+        print('My name is HP. I am your Virtual Assistant')
+        talk('My name is HP. I am your Virtual Assistant')
+
+    elif 'what can you do' in command:
+        print('I can do lots of things. For example, You can ask me Time,Date,Weather in your City, I can also Play music and Video for you, Answer your query, and more...')
+        talk('I can do lots of things. For example, You can ask me Time,Date,Weather in your City, I can also Play music and Video for you, Answer your query, and more...')
+
+    elif 'time' in command:
+        time = datetime.datetime.now().strftime('%I:%M %p')
+        print('Current time is ' + time)
+        talk('Current time is ' + time)
+
+    elif 'date' in command:
+        date = datetime.datetime.now().strftime('%A %d%B,%Y')
+        print('It is ' + date)
+        talk('It is ' + date)
+
+  
+    #elif "weather" in command:
+        #search = "Temperature in Khulna"
+        #url = f"https://www.google.com/search?q=weather{search}"
+        #r = requests.get(url)
+        #data = BeautifulSoup(r.text,"html.parser")
+        #temp = data.find("div", class_ = "BNeawe").text
+        #print(f"Current {search} is {temp} Celsius")
+        #talk(f"Current {search} is {temp} Celsius")
+
+    elif 'who is' in command:
+        person = command.replace('who is', '')
+        info = wikipedia.summary(person, 1)
+        print(info)
+        talk(info)
+
+    elif 'tell me about' in command:
+        look_for = command.replace('tell me about', '')
+        info = wikipedia.summary(look_for, 1)
+        print(info)
+        talk(info)
+
+    elif 'play' in command:
+        song = command.replace('play', '')
+        print('playing ' + song)
+        talk('playing ' + song)
+        pywhatkit.playonyt(song)
+
+
+    elif 'schedule' in command:
+        link = 'https://www.cricbuzz.com/cricket-schedule/upcoming-series/international'
+        res = requests.get(link)
+        soup = bs4.BeautifulSoup(res.text, 'html.parser')
+        details = soup.select(' .cb-schdl-hdr, \n .cb-lv-grn-strip, \n .cb-adjst-lst \n')
+        for i in details:
+         print(i.getText())
+         talk(i.getText())
+
+    elif 'live score' in command:
+        link = 'https://www.cricbuzz.com/cricket-match/live-scores'
+        res = requests.get(link)
+        soup = bs4.BeautifulSoup(res.text, 'html.parser')
+        details = soup.select(' .cb-nav-hdr, \n .cb-lv-scrs-well, \n .cb-lv-scrs-well-live \n')
+        for i in details:
+         print(i.getText())
+         talk(i.getText())
+
+
+    elif 'joke' in command:
+        talk(pyjokes.get_joke())
+    elif 'fun' in command:
+        talk(pyjokes.get_joke())
+
+    elif 'are you single' in command:
+        print('Maybe or Not.')
+        talk('Maybe or Not.')
+    elif 'i love you' in command:
+        print('Sorry Bro, I am in a another relationship')
+        talk('Sorry Bro, I am in a another relationship')
+
+    else:
+        print('I did not get it but I am going to search it for you...')
+        talk('I did not get it but I am going to search it for you...')
+        pywhatkit.search(command)
+
+
+while True:
+    run_hp()
+
+
